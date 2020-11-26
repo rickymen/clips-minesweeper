@@ -158,13 +158,17 @@ while opened < n * n - m:
     find_solution(cells, rules, environment)
     print_probability(cells, environment)
 
+    # for a in environment.activations():
+    #     print('ACT: ', a)
+    for rule in environment.rules():
+        rule.watch_firings = True
+        rule.watch_activations = True
+
     environment.run()
     move = get_move(cells, environment)
     
     if not move == None:
         opened = execute(int(move[1]), int(move[2]))
-    # for a in environment.activations():
-    #     print('ACT: ', a)
     # for fact in environment.facts():
     #     print('FACT: ', fact)
     # for rule in environment.rules():
