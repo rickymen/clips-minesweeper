@@ -157,6 +157,10 @@ while opened < n * n - m:
     startup(cells, environment)
     find_solution(cells, rules, environment)
     print_probability(cells, environment)
+    
+    for r in environment._agenda.rules():
+        r.watch_activations = True
+        r.watch_firings = True
 
     # for a in environment.activations():
     #     print('ACT: ', a)
@@ -166,6 +170,7 @@ while opened < n * n - m:
 
     environment.run()
     move = get_move(cells, environment)
+        
     
     if not move == None:
         opened = execute(int(move[1]), int(move[2]))
