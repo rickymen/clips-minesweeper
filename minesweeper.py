@@ -153,17 +153,10 @@ while opened < n * n - m:
                                 cells.append(cell_name)
                 rules.append((agent_board[i][j], unopened))
 
-    print(cells)
     startup(cells, environment)
     find_solution(cells, rules, environment)
     print_probability(cells, environment)
-    
-    for r in environment._agenda.rules():
-        r.watch_activations = True
-        r.watch_firings = True
 
-    # for a in environment.activations():
-    #     print('ACT: ', a)
     for rule in environment.rules():
         rule.watch_firings = True
         rule.watch_activations = True
@@ -174,6 +167,8 @@ while opened < n * n - m:
     
     if not move == None:
         opened = execute(int(move[1]), int(move[2]))
+    # for a in environment.activations():
+    #     print('ACT: ', a)
     # for fact in environment.facts():
     #     print('FACT: ', fact)
     # for rule in environment.rules():
