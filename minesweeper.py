@@ -1,6 +1,7 @@
 import clips
 from queue import Queue
 from itertools import combinations
+from tkinter import Tk, Canvas, Frame, BOTH, Button
 
 # baca input
 with open('tcsmall.txt', 'r') as f:
@@ -173,4 +174,37 @@ while opened < n * n - m:
     #     print('FACT: ', fact)
     # for rule in environment.rules():
     #     print('RULE: ', rule)
+
+class Board:
+
+    def __init__(self, agent_board, tk):
+        super().__init__()
+        # self.master.title("MineSweeper")
+        # self.pack(fill=BOTH, expand=1)
+        self.board = agent_board
+        self.tk = tk
+        self.frame = Frame(self.tk)
+        self.setup()
     
+    def setup(self):
+        for i in range(len(self.board)):
+            for j in range(len(self.board[i])):
+
+                if(self.board[i][j] == -100):
+                    tile = Button(self.tk, text = self.board[i][j], width = 20, bg = "#ffffff")
+                elif (self.board[i][j] == 1):
+                    tile = Button(self.tk, text = self.board[i][j], width = 20, bg = "red")
+                elif (self.board[i][j] == 2):
+                    tile = Button(self.tk, text = self.board[i][j], width = 20, bg = "green")
+                elif (self.board[i][j] == 3):
+                    tile = Button(self.tk, text = self.board[i][j], width = 20, bg = "yellow")
+                else:
+                    tile = Button(self.tk, text = self.board[i][j], width = 20, bg = "blue")
+
+                tile.grid(row = i + 1, column = j)
+                
+        
+window = Tk()
+window.title("Mineshaft")
+board = Board(agent_board, window)
+window.mainloop()
