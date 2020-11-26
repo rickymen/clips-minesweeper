@@ -4,7 +4,7 @@ from itertools import combinations
 from tkinter import Tk, Canvas, Frame, BOTH, Button
 
 # baca input
-with open('tcsmall.txt', 'r') as f:
+with open('tc.txt', 'r') as f:
     n = int(f.readline())
     bombs = [[0 for i in range(n)] for j in range(n)]
     m = int(f.readline())
@@ -13,7 +13,7 @@ with open('tcsmall.txt', 'r') as f:
         x = int(line[0])
         y = int(line[1])
         bombs[x][y] = 1
-
+clicked = []
 # generate matriks angka (-1 bom, 0-4 jumlah bom di sekeliling)
 board = [[0 for i in range(n)] for j in range(n)]
 dx = [1, 1, 0, -1, -1, -1, 0, 1]
@@ -40,8 +40,9 @@ for i in range(n):
     print()
 
 def execute(x, y):
-    global board, agent_board
+    global board, agent_board, clicked
     # simulate opening
+    clicked.append((x,y))
     queue = Queue()
     print('Opening cell', x, y)
     agent_board[x][y] = board[x][y]
@@ -203,6 +204,7 @@ class Board:
 
                 tile.grid(row = i + 1, column = j)
                 
+print(clicked)
         
 window = Tk()
 window.title("Mineshaft")
