@@ -1,8 +1,9 @@
 import clips
 from queue import Queue
+from itertools import combinations
 
 # baca input
-with open('tc.txt', 'r') as f:
+with open('tcsmall.txt', 'r') as f:
     n = int(f.readline())
     bombs = [[0 for i in range(n)] for j in range(n)]
     m = int(f.readline())
@@ -30,7 +31,7 @@ for i in range(n):
                         count += 1
             board[i][j] = count
 
-agent_board = [[-100 for i in range(n)] for j in range(n)]
+agent_board = [[-100 for i in range(n)] for j in range(n)] # -100: unopened
 
 for i in range(n):
     for j in range(n):
@@ -42,9 +43,9 @@ def execute(x, y):
     # simulate opening
     queue = Queue()
     print('Opening cell', x, y)
+    agent_board[x][y] = board[x][y]
     if board[x][y] == 0:
         queue.put((x, y))
-        agent_board[x][y] = board[x][y]
         while not queue.empty():
             curx, cury = queue.get()
             for k in range(8):
@@ -55,28 +56,117 @@ def execute(x, y):
                         agent_board[nx][ny] = board[nx][ny]
                         if board[nx][ny] == 0:
                             queue.put((nx, ny))
-    else:
-        agent_board[x][y] = 1
 
+    opened = 0
     for i in range(n):
         for j in range(n):
+            if agent_board[i][j] != -100:
+                opened += 1
             print(agent_board[i][j], end="\t")
         print()
+    return opened
+
+def find_solution(cells, rules, env):
+    defrule_string = '(defrule find-solution (declare (salience 10)) '
+    
+    for cell in cells:
+        defrule_string += '(combination ' + cell + ' ?n' + cell + ')'
+        # defrule_string += '(' + cell + '_count ?x' + cell + ')'
+    
+    for rule in rules:
+        # print(rule)
+        if len(rule[1]) == 1:
+            defrule_string += '(test (= ?n' + str(rule[1][0]) + ' ' + str(rule[0]) + '))'
+        elif len(rule[1]) > 1:
+            defrule_string += '(test (= (+ '
+            for cell in rule[1]:
+                defrule_string += '?n' + str(cell) + ' '
+            defrule_string += ')' + str(rule[0]) + '))'
+
+    # defrule_string += ' => (printout t "Found Solution" crlf) '
+    defrule_string += ' => (bind ?*solution_count* (+ ?*solution_count* 1))'
+    for cell in cells:
+        # defrule_string += '(printout t "' + cell + ' = " ?n' + cell + ' crlf)'
+        # defrule_string += '(retract (' + cell + '_count ?x' + cell + ')) '
+        # defrule_string += '(assert (' + cell + '_count ?x' + cell + ' + ?n' + cell + ')) '
+        defrule_string += '(bind ?*' + cell + '_count* (+ ?*' + cell + '_count* ?n' + cell + '))'
+    defrule_string += ')'
+    # print(defrule_string)
+    # for fact in environment.facts():
+    #     print('FACT: ', fact)
+    env.build(defrule_string)
+
+def print_probability(cells, env):
+    defrule_string = '(defrule print_probability (declare (salience -10)) => '
+    defrule_string += '(printout t "Found Probabilities" crlf)'
+    for cell in cells:
+        defrule_string += '(printout t "' + cell + ' = " (/ ?*' + cell + '_count* ?*solution_count*) crlf)'
+    defrule_string += ')'
+    env.build(defrule_string)
+
+def get_move(cells, env):
+    for cell in cells:
+        defrule_string = '?*' + cell + '_count*'
+        if int(env.eval(defrule_string)) == 0:
+            return cell
+    return None
+
+def startup(cells, env):
+    defrule_string = '(assert (number 0) (number 1) '
+    for cell in cells:
+        defrule_string += '(cell ' + cell + ') '
+    defrule_string += ')'
+    # print(defrule_string)
+    env.eval(defrule_string)
+
+    defrule_string = '(defglobal ?*solution_count* = 0)'
+    # print(defrule_string)
+    env.build(defrule_string)
+
+    for cell in cells:
+        defrule_string = '(defglobal ?*' + cell + '_count* = 0)'
+        # print(defrule_string)
+        env.build(defrule_string)
+
+opened = execute(0,0)
 
 # run
-while m > 0:
+while opened < n * n - m:
     environment = clips.Environment()
     
-    # masukin fact dan rule
-    # fact 1
-    # fact 2
+    environment.load('minesweeper.clp')
+
+    cells = []
+    rules = []
+    for i in range(n):
+        for j in range(n):
+            if agent_board[i][j] > 0:
+                unopened = []
+                for k in range(8):
+                    nx = i + dx[k]
+                    ny = j + dy[k]
+                    if nx >= 0 and nx < n and ny >= 0 and ny < n:
+                        if agent_board[nx][ny] == -100: # not opened
+                            cell_name = 'c' + str(nx) + str(ny)
+                            unopened.append(cell_name)
+                            if cell_name not in cells:
+                                cells.append(cell_name)
+                rules.append((agent_board[i][j], unopened))
+
+    print(cells)
+    startup(cells, environment)
+    find_solution(cells, rules, environment)
+    print_probability(cells, environment)
 
     environment.run()
-    for a in environment.activations():
-        print('ACT: ', a)
-    for fact in environment.facts():
-        print('FACT: ', fact)
+    move = get_move(cells, environment)
     
-    execute(0, 0)
-    m = 0
+    if not move == None:
+        opened = execute(int(move[1]), int(move[2]))
+    # for a in environment.activations():
+    #     print('ACT: ', a)
+    # for fact in environment.facts():
+    #     print('FACT: ', fact)
+    # for rule in environment.rules():
+    #     print('RULE: ', rule)
     
