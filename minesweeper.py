@@ -1,8 +1,9 @@
+from tkinter.constants import RIGHT, LEFT
 import clips
 from queue import Queue
 from itertools import combinations
-from tkinter import Tk, Canvas, Frame, BOTH, Button, ttk
-
+from tkinter import Tk, Canvas, Frame, BOTH, Button, ttk, Label, LabelFrame
+import copy
 # Baca input
 FileName = input("Masukkan file testcase: ")
 with open(FileName, 'r') as f:
@@ -63,7 +64,7 @@ def execute(x, y):
                         if board[nx][ny] == 0:
                             queue.put((nx, ny))
 
-    clicked.append(((x,y), agent_board.copy()))
+    clicked.append(((x,y), copy.deepcopy(agent_board)))
     opened = 0
     for i in range(n):
         for j in range(n):
@@ -191,15 +192,31 @@ while opened < n * n - m:
 # Inisialisasi kelas Board
 class Board:
     # Konstruktor
-    def __init__(self, agent_board, tk):
+    def __init__(self, clicked, tk):
         super().__init__()
         # self.master.title("MineSweeper")
         # self.pack(fill=BOTH, expand=1)
-        self.board = agent_board
+        self.board = clicked[0][1]
+        self.move = clicked[0][0]
         self.tk = tk
         self.frame = Frame(self.tk)
         self.setup()
+        self.clicked = clicked
+        self.turn = 1
     
+    def next(self):
+        if (self.turn < len(clicked)):
+            self.turn += 1
+            self.board = clicked[self.turn][1]
+            self.move = clicked[self.turn][0]
+    
+        
+    def prev(self):
+        if (self.turn > 1):
+            self.turn -= 1
+            self.board = clicked[self.turn][1]
+            self.move = clicked[self.turn][0]
+
     # Method setup
     def setup(self):
         n = True
@@ -208,29 +225,47 @@ class Board:
 
                 if(self.board[i][j] == -100):
                     if n:
-                        tile = Button(self.tk, text = "", width = 4, height = 2, bg = "#34495E", state="disabled", borderwidth=0, font=("CourierNew 16 bold"), disabledforeground="#7F8C8D")
+                        tile = Frame(self.tk, width = 60, height = 60, bg = "#34495E", borderwidth=0)
                     else:
-                        tile = Button(self.tk, text = "", width = 4, height = 2, bg = "#2C3E50", state="disabled", borderwidth=0, font=("CourierNew 16 bold"), disabledforeground="#7F8C8D")
+                        tile = Frame(self.tk, width = 60, height = 60, bg = "#2C3E50", borderwidth=0)
                 else:
                     if n:
-                        tile = Button(self.tk, text = self.board[i][j], width = 4, height = 2, bg = "#ECF0F1", state="disabled", borderwidth=0, font=("CourierNew 16 bold"), disabledforeground="#7F8C8D")
+                        tile = Frame(self.tk, width = 60, height = 60, bg = "#ECF0F1", borderwidth=0)
                     else:
-                        tile = Button(self.tk, text = self.board[i][j], width = 4, height = 2, bg = "#DFE4E6", state="disabled", borderwidth=0, font=("CourierNew 16 bold"), disabledforeground="#7F8C8D")
+                        tile = Frame(self.tk, width = 60, height = 60, bg = "#DFE4E6", borderwidth=0)
                         
                     if (self.board[i][j] == 1):
-                        tile.config(disabledforeground="#3498DB")
+                        Label(tile, text=self.board[i][j], bg = tile.cget("bg"), font=("CourierNew 24 bold"), foreground="#3498DB").place(x = 30, y = 30, anchor="center")
                     elif (self.board[i][j] == 2):
-                        tile.config(disabledforeground="#2ECC71")
+                        Label(tile, text=self.board[i][j], bg = tile.cget("bg"), font=("CourierNew 24 bold"), foreground="#2ECC71").place(x = 30, y = 30, anchor="center")
                     elif (self.board[i][j] == 3):
-                        tile.config(disabledforeground="#E74C3C")
+                        Label(tile, text=self.board[i][j], bg = tile.cget("bg"), font=("CourierNew 24 bold"), foreground="#E67E22").place(x = 30, y = 30, anchor="center")
+                    elif (self.board[i][j] == 4):
+                        Label(tile, text=self.board[i][j], bg = tile.cget("bg") , font=("CourierNew 24 bold"), foreground="#9B59B6").place(x = 30, y = 30, anchor="center")
+                    # elif (self.board[i][j] == 5):
+                    #     tile.config(disabledforeground="#E74C3C")
+                    # elif (self.board[i][j] == 6):
+                    #     tile.config(disabledforeground="#1ABC9C")
+                    # elif (self.board[i][j] == 7):
+                    #     tile.config(disabledforeground="#2C3E50")
+                    # elif (self.board[i][j] == 8):
+                    #     tile.config(disabledforeground="#7F8C8D")
 
-                tile.grid(row = i + 1, column = j)
+                tile.grid(row = i, column = j)
                 n = not n
             n = not n
+        tile = Frame(self.tk, width = 60 * (j+1), height = 60, bg = "#95A5A6", borderwidth=0)
+        tile.grid(row = i+1, column = 0, columnspan = j+1)
+        b = Button(tile, text = "◀", bg = "#2ECC71", borderwidth=0, font=("CourierNew 24 bold"), foreground="#ECF0F1")
+        b.pack(side=LEFT, expand=False, fill='both', anchor="w")
+        b = Button(tile, text = "▶", bg = "#2ECC71", borderwidth=0, font=("CourierNew 24 bold"), foreground="#ECF0F1")
+        b.pack(side=RIGHT, expand=False, fill='both', anchor="e")
+        b = Frame(tile, width = 60 * (j-1), height = 60, bg = "#3498DB", borderwidth=0)
+        b.pack(expand=True, fill='both', side="left")
                 
 print(clicked)
 
 window = Tk()
 window.title("Mineshaft")
-board = Board(agent_board, window)
+board = Board(clicked, window)
 window.mainloop()
