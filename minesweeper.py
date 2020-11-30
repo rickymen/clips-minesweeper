@@ -4,6 +4,7 @@ from queue import Queue
 from itertools import combinations
 from tkinter import Tk, Canvas, Frame, BOTH, Button, ttk, Label, LabelFrame
 import copy
+
 # Baca input
 FileName = input("Masukkan file testcase: ")
 with open(FileName, 'r') as f:
@@ -15,7 +16,6 @@ with open(FileName, 'r') as f:
         x = int(line[0])
         y = int(line[1])
         bombs[x][y] = 1
-clicked = []
 
 # Generate matriks angka (-1 bom, 0-4 jumlah bom di sekeliling kotak yang dimaksud)
 board = [[0 for i in range(n)] for j in range(n)]
@@ -38,16 +38,17 @@ for i in range(n):
 # Generate board untuk agent
 agent_board = [[-100 for i in range(n)] for j in range(n)] # -100: unopened
 
+clicked = [("-", copy.deepcopy(agent_board))]
+
 # Print board awal
 for i in range(n):
     for j in range(n):
         print(board[i][j], end="\t")
     print()
 
-# Fungsi untuk execute kotak yang berada di posisi (0,0), yaitu di pojok kiri atas
+# Fungsi untuk execute
 def execute(x, y):
     global board, agent_board, clicked
-    # simulate opening
     queue = Queue()
     print('Opening cell', x, y)
     agent_board[x][y] = board[x][y]
@@ -200,25 +201,29 @@ class Board:
         self.move = clicked[0][0]
         self.tk = tk
         self.frame = Frame(self.tk)
-        self.setup()
         self.clicked = clicked
-        self.turn = 1
+        self.turn = 0
+        self.setup()
     
     def next(self):
-        if (self.turn < len(clicked)):
+        if (self.turn < len(clicked) - 1):
             self.turn += 1
             self.board = clicked[self.turn][1]
             self.move = clicked[self.turn][0]
+            self.setup()
     
         
     def prev(self):
-        if (self.turn > 1):
+        if (self.turn > 0):
             self.turn -= 1
             self.board = clicked[self.turn][1]
             self.move = clicked[self.turn][0]
+            self.setup()
 
     # Method setup
     def setup(self):
+        for child in self.tk.winfo_children():
+            child.destroy()
         n = True
         for i in range(len(self.board)):
             for j in range(len(self.board[i])):
@@ -243,29 +248,28 @@ class Board:
                     elif (self.board[i][j] == 4):
                         Label(tile, text=self.board[i][j], bg = tile.cget("bg") , font=("CourierNew 24 bold"), foreground="#9B59B6").place(x = 30, y = 30, anchor="center")
                     # elif (self.board[i][j] == 5):
-                    #     tile.config(disabledforeground="#E74C3C")
+                        # Label(tile, text=self.board[i][j], bg = tile.cget("bg"), font=("CourierNew 24 bold"), foreground="#E74C3C").place(x = 30, y = 30, anchor="center")
                     # elif (self.board[i][j] == 6):
-                    #     tile.config(disabledforeground="#1ABC9C")
+                        # Label(tile, text=self.board[i][j], bg = tile.cget("bg"), font=("CourierNew 24 bold"), foreground="#1ABC9C").place(x = 30, y = 30, anchor="center")
                     # elif (self.board[i][j] == 7):
-                    #     tile.config(disabledforeground="#2C3E50")
+                        # Label(tile, text=self.board[i][j], bg = tile.cget("bg"), font=("CourierNew 24 bold"), foreground="#2C3E50").place(x = 30, y = 30, anchor="center")
                     # elif (self.board[i][j] == 8):
-                    #     tile.config(disabledforeground="#7F8C8D")
+                        # Label(tile, text=self.board[i][j], bg = tile.cget("bg"), font=("CourierNew 24 bold"), foreground="#7F8C8D").place(x = 30, y = 30, anchor="center")
 
                 tile.grid(row = i, column = j)
                 n = not n
             n = not n
         tile = Frame(self.tk, width = 60 * (j+1), height = 60, bg = "#95A5A6", borderwidth=0)
         tile.grid(row = i+1, column = 0, columnspan = j+1)
-        b = Button(tile, text = "◀", bg = "#2ECC71", borderwidth=0, font=("CourierNew 24 bold"), foreground="#ECF0F1")
-        b.pack(side=LEFT, expand=False, fill='both', anchor="w")
-        b = Button(tile, text = "▶", bg = "#2ECC71", borderwidth=0, font=("CourierNew 24 bold"), foreground="#ECF0F1")
-        b.pack(side=RIGHT, expand=False, fill='both', anchor="e")
-        b = Frame(tile, width = 60 * (j-1), height = 60, bg = "#3498DB", borderwidth=0)
+        Button(tile, text = "◀", bg = "#2ECC71", borderwidth=0, font=("CourierNew 24 bold"), foreground="#ECF0F1", command = self.prev).pack(side=LEFT, expand=False, fill='both', anchor="w")
+        Button(tile, text = "▶", bg = "#2ECC71", borderwidth=0, font=("CourierNew 24 bold"), foreground="#ECF0F1", command = self.next).pack(side=RIGHT, expand=False, fill='both', anchor="e")
+        b = Frame(tile, width = 60 * (j-0.4), height = 60, bg = "#3498DB", borderwidth=0)
+        Label(b, text="Move: " + str(self.move), bg = "#3498DB", font=("CourierNew 18 bold"), foreground="#ECF0F1").place(x = (60 * (j-0.4))/2, y = 30, anchor="center")
         b.pack(expand=True, fill='both', side="left")
                 
-print(clicked)
-
+# Membuat GUI
 window = Tk()
-window.title("Mineshaft")
+window.title("踩地雷 - Nyapu Ranjau - Minecraft")
+window.resizable(False, False)
 board = Board(clicked, window)
 window.mainloop()
