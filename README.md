@@ -7,7 +7,6 @@ Make sure that you have Python installed in your desktop.
 * `git clone rickymen/clips-minesweeper`
 * `pip3 install clipspy`
 * `pip3 install tkinter`
-<br>
 
 # Run
 `python3 minesweeper.py`
