@@ -17,4 +17,5 @@ Selanjutnya masukkan nama file/path file test case yang ingin digunakan relatif 
 * Tombol Prev untuk melihat langkah sebelumnya
 * Tombol Next untuk melihat langkah selanjutnya
 <br>
-![](assets/gui.png)
+
+![GUI Minesweeper](/assets/gui.png)
