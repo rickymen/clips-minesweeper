@@ -1,10 +1,11 @@
 import clips
 from queue import Queue
 from itertools import combinations
-from tkinter import Tk, Canvas, Frame, BOTH, Button
+from tkinter import Tk, Canvas, Frame, BOTH, Button, ttk
 
 # baca input
-with open('tc.txt', 'r') as f:
+FileName = input("Masukkan file testcase: ")
+with open(FileName, 'r') as f:
     n = int(f.readline())
     bombs = [[0 for i in range(n)] for j in range(n)]
     m = int(f.readline())
@@ -32,8 +33,10 @@ for i in range(n):
                         count += 1
             board[i][j] = count
 
+# generate board u/ agent
 agent_board = [[-100 for i in range(n)] for j in range(n)] # -100: unopened
 
+# print board solusi
 for i in range(n):
     for j in range(n):
         print(board[i][j], end="\t")
@@ -130,6 +133,7 @@ def startup(cells, env):
         # print(defrule_string)
         env.build(defrule_string)
 
+# inisialisasi board dengan buka di 0,0 saat turn awal
 opened = execute(0,0)
 
 # run
@@ -186,6 +190,9 @@ class Board:
         self.tk = tk
         self.frame = Frame(self.tk)
         self.setup()
+        s = ttk.Style()
+        s.theme_use()
+        print("Theme names:", s.theme_names())
     
     def setup(self):
         for i in range(len(self.board)):
