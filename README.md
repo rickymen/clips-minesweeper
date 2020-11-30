@@ -19,3 +19,9 @@ Selanjutnya masukkan nama file/path file test case yang ingin digunakan relatif 
 <br>
 
 ![GUI Minesweeper](/assets/gui.png)
+
+## Anggota Kelompok
+* 13518062 Ricky Fernando
+* 13518081 Vincentius Lienardo
+* 13518093 Morgen Sudyanto
+* 13518107 Chokyi Ozer
