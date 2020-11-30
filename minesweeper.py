@@ -38,9 +38,11 @@ for i in range(n):
 # Generate board untuk agent
 agent_board = [[-100 for i in range(n)] for j in range(n)] # -100: unopened
 
+# Mencatat semua move - inisialisasi
 clicked = [("-", copy.deepcopy(agent_board))]
 
-# Print board awal
+# Print board solusi (yang sudah terbuka semua)
+print("Solution: ")
 for i in range(n):
     for j in range(n):
         print(board[i][j], end="\t")
@@ -82,10 +84,8 @@ def find_solution(cells, rules, env):
     
     for cell in cells:
         defrule_string += '(combination ' + cell + ' ?n' + cell + ')'
-        # defrule_string += '(' + cell + '_count ?x' + cell + ')'
     
     for rule in rules:
-        # print(rule)
         if len(rule[1]) == 1:
             defrule_string += '(test (= ?n' + str(rule[1][0]) + ' ' + str(rule[0]) + '))'
         elif len(rule[1]) > 1:
@@ -94,17 +94,10 @@ def find_solution(cells, rules, env):
                 defrule_string += '?n' + str(cell) + ' '
             defrule_string += ')' + str(rule[0]) + '))'
 
-    # defrule_string += ' => (printout t "Found Solution" crlf) '
     defrule_string += ' => (bind ?*solution_count* (+ ?*solution_count* 1))'
     for cell in cells:
-        # defrule_string += '(printout t "' + cell + ' = " ?n' + cell + ' crlf)'
-        # defrule_string += '(retract (' + cell + '_count ?x' + cell + ')) '
-        # defrule_string += '(assert (' + cell + '_count ?x' + cell + ' + ?n' + cell + ')) '
         defrule_string += '(bind ?*' + cell + '_count* (+ ?*' + cell + '_count* ?n' + cell + '))'
     defrule_string += ')'
-    # print(defrule_string)
-    # for fact in environment.facts():
-    #     print('FACT: ', fact)
     env.build(defrule_string)
 
 # Melakukan print probability
@@ -131,16 +124,13 @@ def startup(cells, env):
     for cell in cells:
         defrule_string += '(cell ' + cell + ') '
     defrule_string += ')'
-    # print(defrule_string)
     env.eval(defrule_string)
 
     defrule_string = '(defglobal ?*solution_count* = 0)'
-    # print(defrule_string)
     env.build(defrule_string)
 
     for cell in cells:
         defrule_string = '(defglobal ?*' + cell + '_count* = 0)'
-        # print(defrule_string)
         env.build(defrule_string)
 
 # Inisialisasi board dengan buka di (0,0) saat turn awal
@@ -183,12 +173,12 @@ while opened < n * n - m:
     
     if not move == None:
         opened = execute(int(move[1]), int(move[2]))
-    # for a in environment.activations():
-    #     print('ACT: ', a)
-    # for fact in environment.facts():
-    #     print('FACT: ', fact)
-    # for rule in environment.rules():
-    #     print('RULE: ', rule)
+
+    for fact in environment.facts():
+        print('FACT: ', fact)
+
+    for rule in environment.rules():
+        print('RULE: ', rule)
 
 # Inisialisasi kelas Board
 class Board:
@@ -210,7 +200,7 @@ class Board:
             self.turn += 1
             self.board = clicked[self.turn][1]
             self.move = clicked[self.turn][0]
-            self.setup()
+            self.update()
     
         
     def prev(self):
@@ -218,7 +208,7 @@ class Board:
             self.turn -= 1
             self.board = clicked[self.turn][1]
             self.move = clicked[self.turn][0]
-            self.setup()
+            self.update()
 
     # Method setup
     def setup(self):
@@ -266,10 +256,43 @@ class Board:
         b = Frame(tile, width = 60 * (j-0.4), height = 60, bg = "#3498DB", borderwidth=0)
         Label(b, text="Move: " + str(self.move), bg = "#3498DB", font=("CourierNew 18 bold"), foreground="#ECF0F1").place(x = (60 * (j-0.4))/2, y = 30, anchor="center")
         b.pack(expand=True, fill='both', side="left")
+
+    def update(self):
+        for child in self.tk.winfo_children():
+            info = child.grid_info()
+            n = (info["row"]+(info["column"] % 2)) % 2 == 0
+            if (info["row"] < len(self.board) and info["column"] < len(self.board[info["row"]])):
+                if (self.board[info["row"]][info["column"]] == -100):
+                    if n:
+                        child.config(bg = "#34495E")
+                    else:
+                        child.config(bg = "#2C3E50")
+                    for labels in child.winfo_children():
+                        labels.destroy()
+                else:
+                    if n:
+                        child.config(bg = "#ECF0F1")
+                    else:
+                        child.config(bg = "#DFE4E6")
+                    if (len(child.winfo_children()) == 0):
+                        if (self.board[info["row"]][info["column"]] == 1):
+                            Label(child, text=self.board[info["row"]][info["column"]], bg = child.cget("bg"), font=("CourierNew 24 bold"), foreground="#3498DB").place(x = 30, y = 30, anchor="center")
+                        elif (self.board[info["row"]][info["column"]] == 2):
+                            Label(child, text=self.board[info["row"]][info["column"]], bg = child.cget("bg"), font=("CourierNew 24 bold"), foreground="#2ECC71").place(x = 30, y = 30, anchor="center")
+                        elif (self.board[info["row"]][info["column"]] == 3):
+                            Label(child, text=self.board[info["row"]][info["column"]], bg = child.cget("bg"), font=("CourierNew 24 bold"), foreground="#E67E22").place(x = 30, y = 30, anchor="center")
+                        elif (self.board[info["row"]][info["column"]] == 4):
+                            Label(child, text=self.board[info["row"]][info["column"]], bg = child.cget("bg") , font=("CourierNew 24 bold"), foreground="#9B59B6").place(x = 30, y = 30, anchor="center")
+            else:
+                for subchild in child.winfo_children():
+                    if subchild.winfo_class() == 'Frame':
+                        subchild.winfo_children()[0].destroy()
+                        Label(subchild, text="Move: " + str(self.move), bg = "#3498DB", font=("CourierNew 18 bold"), foreground="#ECF0F1").place(x = (60 * (j-0.4))/2, y = 30, anchor="center")
+                        subchild.pack(expand=True, fill='both', side="left")
                 
 # Membuat GUI
 window = Tk()
-window.title("踩地雷 - Nyapu Ranjau - Minecraft")
+window.title("踩地雷 - Nyapu Ranjau - Mainswiper")
 window.resizable(False, False)
 board = Board(clicked, window)
 window.mainloop()
