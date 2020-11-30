@@ -3,7 +3,7 @@ from queue import Queue
 from itertools import combinations
 from tkinter import Tk, Canvas, Frame, BOTH, Button, ttk
 
-# baca input
+# Baca input
 FileName = input("Masukkan file testcase: ")
 with open(FileName, 'r') as f:
     n = int(f.readline())
@@ -15,7 +15,8 @@ with open(FileName, 'r') as f:
         y = int(line[1])
         bombs[x][y] = 1
 clicked = []
-# generate matriks angka (-1 bom, 0-4 jumlah bom di sekeliling)
+
+# Generate matriks angka (-1 bom, 0-4 jumlah bom di sekeliling kotak yang dimaksud)
 board = [[0 for i in range(n)] for j in range(n)]
 dx = [1, 1, 0, -1, -1, -1, 0, 1]
 dy = [0, -1, -1, -1, 0, 1, 1, 1]
@@ -33,19 +34,19 @@ for i in range(n):
                         count += 1
             board[i][j] = count
 
-# generate board u/ agent
+# Generate board untuk agent
 agent_board = [[-100 for i in range(n)] for j in range(n)] # -100: unopened
 
-# print board solusi
+# Print board awal
 for i in range(n):
     for j in range(n):
         print(board[i][j], end="\t")
     print()
 
+# Fungsi untuk execute kotak yang berada di posisi (0,0), yaitu di pojok kiri atas
 def execute(x, y):
     global board, agent_board, clicked
     # simulate opening
-    clicked.append((x,y))
     queue = Queue()
     print('Opening cell', x, y)
     agent_board[x][y] = board[x][y]
@@ -62,6 +63,7 @@ def execute(x, y):
                         if board[nx][ny] == 0:
                             queue.put((nx, ny))
 
+    clicked.append(((x,y), agent_board.copy()))
     opened = 0
     for i in range(n):
         for j in range(n):
@@ -71,7 +73,9 @@ def execute(x, y):
         print()
     return opened
 
+# Fungsi untuk melakukan generate solusi
 def find_solution(cells, rules, env):
+    # Menginisialisasi rule dengan menggunakan defrule dengan salience 10
     defrule_string = '(defrule find-solution (declare (salience 10)) '
     
     for cell in cells:
@@ -101,6 +105,7 @@ def find_solution(cells, rules, env):
     #     print('FACT: ', fact)
     env.build(defrule_string)
 
+# Melakukan print probability
 def print_probability(cells, env):
     defrule_string = '(defrule print_probability (declare (salience -10)) => '
     defrule_string += '(printout t "Found Probabilities" crlf)'
@@ -109,6 +114,7 @@ def print_probability(cells, env):
     defrule_string += ')'
     env.build(defrule_string)
 
+# Fungsi untuk mengembalikan cell yang ingin dibuka
 def get_move(cells, env):
     for cell in cells:
         defrule_string = '?*' + cell + '_count*'
@@ -116,7 +122,9 @@ def get_move(cells, env):
             return cell
     return None
 
+# Fungsi untuk deklarasi fakta
 def startup(cells, env):
+    # Deklarasi facts dengan menggunakan assert
     defrule_string = '(assert (number 0) (number 1) '
     for cell in cells:
         defrule_string += '(cell ' + cell + ') '
@@ -133,10 +141,10 @@ def startup(cells, env):
         # print(defrule_string)
         env.build(defrule_string)
 
-# inisialisasi board dengan buka di 0,0 saat turn awal
+# Inisialisasi board dengan buka di (0,0) saat turn awal
 opened = execute(0,0)
 
-# run
+# Run
 while opened < n * n - m:
     environment = clips.Environment()
     
@@ -180,8 +188,9 @@ while opened < n * n - m:
     # for rule in environment.rules():
     #     print('RULE: ', rule)
 
+# Inisialisasi kelas Board
 class Board:
-
+    # Konstruktor
     def __init__(self, agent_board, tk):
         super().__init__()
         # self.master.title("MineSweeper")
@@ -191,6 +200,7 @@ class Board:
         self.frame = Frame(self.tk)
         self.setup()
     
+    # Method setup
     def setup(self):
         n = True
         for i in range(len(self.board)):
@@ -219,7 +229,7 @@ class Board:
             n = not n
                 
 print(clicked)
-        
+
 window = Tk()
 window.title("Mineshaft")
 board = Board(agent_board, window)
