@@ -190,26 +190,33 @@ class Board:
         self.tk = tk
         self.frame = Frame(self.tk)
         self.setup()
-        s = ttk.Style()
-        s.theme_use()
-        print("Theme names:", s.theme_names())
     
     def setup(self):
+        n = True
         for i in range(len(self.board)):
             for j in range(len(self.board[i])):
 
                 if(self.board[i][j] == -100):
-                    tile = Button(self.tk, text = self.board[i][j], width = 20, bg = "#ffffff")
-                elif (self.board[i][j] == 1):
-                    tile = Button(self.tk, text = self.board[i][j], width = 20, bg = "red")
-                elif (self.board[i][j] == 2):
-                    tile = Button(self.tk, text = self.board[i][j], width = 20, bg = "green")
-                elif (self.board[i][j] == 3):
-                    tile = Button(self.tk, text = self.board[i][j], width = 20, bg = "yellow")
+                    if n:
+                        tile = Button(self.tk, text = "", width = 4, height = 2, bg = "#34495E", state="disabled", borderwidth=0, font=("CourierNew 16 bold"), disabledforeground="#7F8C8D")
+                    else:
+                        tile = Button(self.tk, text = "", width = 4, height = 2, bg = "#2C3E50", state="disabled", borderwidth=0, font=("CourierNew 16 bold"), disabledforeground="#7F8C8D")
                 else:
-                    tile = Button(self.tk, text = self.board[i][j], width = 20, bg = "blue")
+                    if n:
+                        tile = Button(self.tk, text = self.board[i][j], width = 4, height = 2, bg = "#ECF0F1", state="disabled", borderwidth=0, font=("CourierNew 16 bold"), disabledforeground="#7F8C8D")
+                    else:
+                        tile = Button(self.tk, text = self.board[i][j], width = 4, height = 2, bg = "#DFE4E6", state="disabled", borderwidth=0, font=("CourierNew 16 bold"), disabledforeground="#7F8C8D")
+                        
+                    if (self.board[i][j] == 1):
+                        tile.config(disabledforeground="#3498DB")
+                    elif (self.board[i][j] == 2):
+                        tile.config(disabledforeground="#2ECC71")
+                    elif (self.board[i][j] == 3):
+                        tile.config(disabledforeground="#E74C3C")
 
                 tile.grid(row = i + 1, column = j)
+                n = not n
+            n = not n
                 
 print(clicked)
         
