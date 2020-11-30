@@ -5,7 +5,6 @@ Prerequisites for [clips-minesweeper](https://github.com/rickymen/clips-mineswee
 Make sure that you have Python installed in your desktop.
 ## How to Install
 * `gh repo clone rickymen/clips-minesweeper`
-* `pip3 install clips`
 * `pip3 install clipspy`
 * `pip3 install tkinter`
 
