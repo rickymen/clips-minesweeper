@@ -219,10 +219,16 @@ class Board:
             for j in range(len(self.board[i])):
 
                 if(self.board[i][j] == -100):
-                    if n:
-                        tile = Frame(self.tk, width = 60, height = 60, bg = "#34495E", borderwidth=0)
+                    if (self.turn == len(clicked) - 1):
+                        if n:
+                            tile = Frame(self.tk, width = 60, height = 60, bg = "#E74C3C", borderwidth=0)
+                        else:
+                            tile = Frame(self.tk, width = 60, height = 60, bg = "#C0392B", borderwidth=0)
                     else:
-                        tile = Frame(self.tk, width = 60, height = 60, bg = "#2C3E50", borderwidth=0)
+                        if n:
+                            tile = Frame(self.tk, width = 60, height = 60, bg = "#34495E", borderwidth=0)
+                        else:
+                            tile = Frame(self.tk, width = 60, height = 60, bg = "#2C3E50", borderwidth=0)
                 else:
                     if n:
                         tile = Frame(self.tk, width = 60, height = 60, bg = "#ECF0F1", borderwidth=0)
@@ -263,10 +269,16 @@ class Board:
             n = (info["row"]+(info["column"] % 2)) % 2 == 0
             if (info["row"] < len(self.board) and info["column"] < len(self.board[info["row"]])):
                 if (self.board[info["row"]][info["column"]] == -100):
-                    if n:
-                        child.config(bg = "#34495E")
+                    if (self.turn == len(clicked) - 1):
+                        if n:   
+                            child.config(bg = "#E74C3C")
+                        else:
+                            child.config(bg = "#C0392B")
                     else:
-                        child.config(bg = "#2C3E50")
+                        if n:   
+                            child.config(bg = "#34495E")
+                        else:
+                            child.config(bg = "#2C3E50")
                     for labels in child.winfo_children():
                         labels.destroy()
                 else:
@@ -289,7 +301,12 @@ class Board:
                         subchild.winfo_children()[0].destroy()
                         Label(subchild, text="Move: " + str(self.move), bg = "#3498DB", font=("CourierNew 18 bold"), foreground="#ECF0F1").place(x = (60 * (j-0.4))/2, y = 30, anchor="center")
                         subchild.pack(expand=True, fill='both', side="left")
-                
+
+print("Move list: ")
+for i in range(len(clicked)):
+    if i != 0:
+        print(str(i) + ": " + str(clicked[i][0]))
+
 # Membuat GUI
 window = Tk()
 window.title("踩地雷 - Nyapu Ranjau - Mainswiper")
