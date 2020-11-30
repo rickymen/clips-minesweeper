@@ -8,6 +8,7 @@ Make sure that you have Python installed in your desktop.
 * `pip3 install clipspy`
 * `pip3 install tkinter`
 <br>
+
 # Run
 `python3 minesweeper.py`
 
